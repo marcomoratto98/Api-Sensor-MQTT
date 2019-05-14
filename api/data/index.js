@@ -7,7 +7,8 @@ const influx = new Influx.InfluxDB({
         measurement: 'position',
         fields: { lat: Influx.FieldType.STRING,
             lon: Influx.FieldType.STRING,
-            npersone: Influx.FieldType.INTEGER },
+            npersone: Influx.FieldType.INTEGER,
+            porte: Influx.FieldType.BOOLEAN },
         tags: ['linea', 'nautobus']
       }
     ]
@@ -38,7 +39,8 @@ async function routes (fastify, options) {
                 },
                 fields: { lat: data.distance[0],
                   lon: data.distance[1],
-                  npersone: data.people },
+                  npersone: data.people,
+                  porte: data.porte },
                 timestamp: datess,
               }
             ], {
