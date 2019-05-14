@@ -6,6 +6,7 @@
     "main": "index.js",
     "dependencies": {
         "fastify": "^2.2.0",
+        "influx": "^5.0.7",
         "mssql": "^5.0.5"
     }
 }

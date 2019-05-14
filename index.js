@@ -3,7 +3,6 @@ const fastify = require('fastify')({
     ignoreTrailingSlash: true
 });
 fastify.register(require('./api/data'), { prefix: '/api/data' });
-fastify.register(require('./api/distance'), { prefix: '/api/distance' });
 
 const start = async () => {
     try {

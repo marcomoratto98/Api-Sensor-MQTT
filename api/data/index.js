@@ -1,34 +1,60 @@
-const sql = require("mssql");
-const config= {
-    user: '/*user*/',
-    password: '/*password*/',
-    server: 'localhost\\sqlexpress',
-    database: 'ITS-IOT',
-    options: {
-        encrypt: false
-    }
-};
+const Influx=require('influx');
+const influx = new Influx.InfluxDB({
+    host: 'localhost',
+    database: 'autobus',
+    schema: [
+      {
+        measurement: 'position',
+        fields: { lat: Influx.FieldType.STRING,
+            lon: Influx.FieldType.STRING,
+            npersone: Influx.FieldType.INTEGER },
+        tags: ['linea', 'nautobus']
+      }
+    ]
+  });
+
 
 async function routes (fastify, options) {
     fastify.post('/', async (request, reply) => {
         var data=request.body;
-            try{
-                console.log("                           POST                           ");
-                let pool = await sql.connect(config);
-                let result =await pool
-                .query(`INSERT INTO JsonTEST 
-                ([Numpeople],[Dataora]) 
-                VALUES ('${data.people}','${data.date}');`);
-                sql.close();
-                reply.code(200).send();
-            }
-            catch(error){
-                reply.code(500).send(error);
-                console.log("                              ERRORE:                                                                  "+error);
-            }
-            finally{
-                sql.close();
-            } 
+        //console.log(JSON.stringify(data));
+        var datess=Date.parse(data.date)* 1000000;
+        
+
+        influx.getDatabaseNames()
+        .then(names => {
+          if (!names.includes('autobus')) {
+            return influx.createDatabase('autobus');
+          }
+        })
+        .then(() => {
+        
+          influx.writePoints([
+              {
+                measurement: 'position',
+                tags: {
+                  linea: data.linea,
+                  nautobus: data.nautobus,
+                },
+                fields: { lat: data.distance[0],
+                  lon: data.distance[1],
+                  npersone: data.people },
+                timestamp: datess,
+              }
+            ], {
+              database: 'autobus'
+            }).then(function(){
+              reply.code(200).send();
+              console.log("Query avvenuta con successo-----------------------------------------------");
+            })
+            .catch(error => {
+              //console.error(`Error saving data to InfluxDB! ${err.stack}`)
+              console.log("                              ERRORE:                                                                  "+error);
+              reply.code(500).send(error);
+              
+          });
+        })
+        .catch(error => console.log({ error }));
     });
 }
 module.exports=routes;
