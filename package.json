@@ -6,6 +6,10 @@
     "main": "index.js",
     "dependencies": {
         "fastify": "^2.2.0",
+<<<<<<< HEAD
+        "file-system": "^2.2.2",
+=======
+>>>>>>> dd2fc2934a885421acbca1ec1027fdad73f24b00
         "influx": "^5.0.7",
         "mssql": "^5.0.5"
     }
