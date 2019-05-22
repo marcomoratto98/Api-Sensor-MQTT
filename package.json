@@ -1,0 +1,13 @@
+{
+    "name": "APIReceiver",
+    "description": "Riceve i dati dai bus sotto forma di file json",
+    "authors": "Skylight Application",
+    "version": "1.0.0",
+    "main": "index.js",
+    "dependencies": {
+        "fastify": "^2.2.0",
+        "file-system": "^2.2.2",
+        "influx": "^5.0.7",
+        "mssql": "^5.0.5"
+    }
+}
