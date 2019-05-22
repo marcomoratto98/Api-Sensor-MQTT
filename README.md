@@ -8,7 +8,7 @@ git clone https://github.com/VaporMontey/API-projectwork-2019.git
 ### Additional installation instructions
 Prerequisiti:
 
-- Vedi prerequisiti *Sensors* ([https://github.com/VaporMontey/Sensor-projectwork-2019/blob/redis/README.md])
+- Vedi prerequisiti *Sensors* (https://github.com/VaporMontey/Sensor-projectwork-2019/blob/redis/README.md)
 - *Node.js*
 
 ## Configuration
