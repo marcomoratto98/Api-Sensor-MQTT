@@ -19,7 +19,9 @@ const start = async () => {
 }
 start();
 
-var client = mqtt.connect('mqtt://localhost');
+var client = mqtt.connect('mqtt://127.0.0.1');
+//console.log("MQTT Broker: ");
+//console.log(client);
 var db = [];
 var schema;
 
@@ -61,38 +63,77 @@ client.on('connect', function (){
     client.subscribe('/bus/dati', function (err){
         console.log('Subscribed to /bus/dati');
         if (err)
-            console.log('Errore di connessione');
-    })
-})
+            console.log('Errore di connessione a Dati');
+    });
+    client.subscribe('/bus/request', function(err){
+        console.log('Subscibed to /bus/request');
+        if(err)
+            console.log('Errore di connessione a Request');
+    });
+});
 
 client.on('message', function(topic, message) {
-    var data=JSON.parse(message.toString());
-    var datess=Date.parse(data.date)* 1000000;
-        
-    influx.getDatabaseNames().then(names => {
-        if (!names.includes(db[1])) {
-            return influx.createDatabase(db[1]);
+
+    console.log(topic);
+    console.log(message.toString());
+
+    //console.log(influx);
+
+    if(topic == '/bus/request'){
+        //Recupero di TUTTI i dati
+
+        try{
+            console.log(db[1]);
+            influx.query(`
+                select * from ${name}
+                order by time desc;
+            `).then(result => {
+                res.json(result)
+                //client.publish(topic,JSON.parse(result));
+            }).catch(err => {
+                res.status(500).send(err.stack)
+                //client.publish(topic,err.stack);
+            })
+
+        } catch(error){
+            console.log(error);
         }
-    }).then(() => {
-        influx.writePoints([{
-            measurement: 'position',
-            tags: {
-                linea: data.linea,
-                nautobus: data.nautobus,
-            },
-            fields: { 
-                lat: data.distance[0],
-                lon: data.distance[1],
-                npersone: data.people,
-                porte: data.porte 
-            },
-            timestamp: datess,
-        }], {
-            database: db[1]
-        }).then(function(){
-            console.log('Dati inseriti');
-        }).catch(error => {
-            console.log('Errore: '+error);
-        });
-    }).catch(error => console.log({ error }));
-})
+
+    }
+    if(topic == '/bus/dati'){
+
+        //Inserimento dei dati
+        try {
+            var data=JSON.parse(message.toString());
+            var datess=Date.parse(data.date)* 1000000;
+            influx.getDatabaseNames().then(names => {
+                if (!names.includes(db[1])) {
+                    return influx.createDatabase(db[1]);
+                }
+            }).then(() => {
+                influx.writePoints([{
+                    measurement: 'position',
+                    tags: {
+                        linea: data.linea,
+                        nautobus: data.nautobus,
+                    },
+                    fields: { 
+                        lat: data.distance[0],
+                        lon: data.distance[1],
+                        npersone: data.people,
+                        porte: data.porte 
+                    },
+                    timestamp: datess,
+                }], {
+                    database: db[1]
+                }).then(function(){
+                    console.log('Dati inseriti');
+                }).catch(error => {
+                    console.log('Errore: '+error);
+                });
+            }).catch(error => console.log({ error }));
+        } catch (error) {
+            console.log(error);
+        }
+    }
+});

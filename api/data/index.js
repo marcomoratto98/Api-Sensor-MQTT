@@ -3,6 +3,26 @@ const Influx = require('influx');
 
 async function routes (fastify, options) {
 
+  fastify.get('/', async (request, reply) => {
+    try{
+
+      influx.query(`
+      select * from tide
+      where location =~ /(?i)(${place})/
+    `)
+    .then( result => response.status(200).json(result) )
+    .catch( error => response.status(500).json({ error }) );
+
+      
+    }
+    catch(error){
+        reply.code(500).send(error);
+    }
+    finally{
+        sql.close();
+    }
+  });
+
   fastify.post('/', async (request, reply) => {
 
     fs.readFile('config.txt', (err, obj) => { 
