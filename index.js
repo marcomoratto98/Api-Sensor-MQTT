@@ -70,14 +70,41 @@ client.on('connect', function (){
         if(err)
             console.log('Errore di connessione a Request');
     });
+    client.subscribe('/bus/request/+', function(err){
+        console.log('Subscibed to /bus/request/+');
+        if(err)
+            console.log('Errore di connessione a Request/+');
+    });
 });
 
 client.on('message', function(topic, message) {
 
     console.log(topic);
     console.log(message.toString());
-
+    var id=topic.split('/');
+    //console.log(id);
     //console.log(influx);
+
+    if(topic == '/bus/request/'+id[3]){
+        //Recupero di TUTTI i dati
+
+        try{
+            console.log(db[1]);
+            influx.query(`
+                select * from ${db[1]}.'autogen'.'position'
+                order by time desc;
+            `).then(result => {
+                res.json(result)
+                //client.publish(topic,JSON.parse(result));
+            }).catch(err => {
+                res.status(500).send(err.stack)
+                //client.publish(topic,err.stack);
+            })
+
+        } catch(error){
+            console.log(error);
+        }
+    }
 
     if(topic == '/bus/request'){
         //Recupero di TUTTI i dati
@@ -85,7 +112,7 @@ client.on('message', function(topic, message) {
         try{
             console.log(db[1]);
             influx.query(`
-                select * from ${name}
+                select * from ${db[1]}.'autogen'.'position'
                 order by time desc;
             `).then(result => {
                 res.json(result)

@@ -7,11 +7,32 @@ async function routes (fastify, options) {
     try{
 
       influx.query(`
-      select * from tide
-      where location =~ /(?i)(${place})/
-    `)
-    .then( result => response.status(200).json(result) )
-    .catch( error => response.status(500).json({ error }) );
+        select * from ${db[1]}.'autogen'.'position'
+        order by time desc;
+      `)
+      .then( result => response.status(200).json(result) )
+      .catch( error => response.status(500).json({ error }) );
+
+      
+    }
+    catch(error){
+        reply.code(500).send(error);
+    }
+    finally{
+        sql.close();
+    }
+  });
+
+  fastify.get('/:id', async (request, reply) => {
+    try{
+
+      influx.query(`
+        select * from ${db[1]}.'autogen'.'position'
+        where linea='${request.params.id}'
+        order by time desc;
+      `)
+      .then( result => response.status(200).json(result) )
+      .catch( error => response.status(500).json({ error }) );
 
       
     }
